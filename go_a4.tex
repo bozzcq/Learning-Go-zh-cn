@@ -41,7 +41,7 @@
 
 %% Title page.
 \begin{center}
-\hspace{1.0cm}{\scalefont{6.00}{\sffamily{\mbox{\vspace{1.0cm}学习~Go 语言}}}}\\
+\hspace{1.0cm}{\scalefont{6.00}{\sffamily{\mbox{\vspace{1.0cm}Learning Go}}}}\\
 \end{center}
 \vspace*{2cm}
 \begin{figure}[h!]
@@ -52,32 +52,33 @@
 \vspace*{0.02\stockheight}
 \begin{minipage}{0.4\textwidth}
 \begin{flushleft} \large
-\hspace*{2,0cm}作者：\\
+\hspace*{2,0cm}Author:\\
 \hspace*{2.0cm}\emph{Miek Gieben}\\
-\hspace*{2.0cm}译者：\\
-\hspace*{2.0cm}\emph{邢星}\\
 \vfill
 \end{flushleft}
 \end{minipage}
 \hspace{5mm}
 \begin{minipage}{0.4\textwidth}
 \begin{flushright} \large
-感谢：\\
-\emph{Go 作者}，\emph{Google}\\
+Thanks to:\\
+\emph{Go Authors}, \emph{Google}\\
 \vfill
 \end{flushright}
 \end{minipage}
 \vspace*{0.5cm}
 \begin{center}
-下朋友提供了帮助和贡献：
+With the help and contributions from: 
 
-（{\small 按字母顺序}）
+({\small in alphabetical order})
 
 \input{go-contributors.tex}
-还有来自以下朋友的小帮助:
+
+And with minor contributions from:
 
 \input{go-nits-contributors.tex}
 \end{center}
+
+
 \vfill
 \begin{center}
     \hspace*{1cm}\CcGroupByNcSa{0.83}{0.95ex}\\[2.5ex]
@@ -85,7 +86,6 @@
 \end{center}
 \begin{center}
 \hspace*{1cm}\emph{Miek Gieben -- \copyright 2010 - 2012}
-\hspace*{1cm}\emph{邢星~-- \copyright 2011 - 2013}
 \end{center}
 \vspace{-3em}
 %% End title page.
@@ -95,19 +95,18 @@
 \thispagestyle{empty}
 \begin{figure}[H]
 \emph{
-本作品依照署名-非商业性使用-相同方式共享~3.0 Unported 许可证发布。
-访问~\url{http://creativecommons.org/licenses/by-nc-sa/3.0/} 
-查看该许可证副本，或写信到~
-Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA。}    
+This work is licensed under the Attribution-NonCommercial-ShareAlike 3.0 Unported License. To
+view a copy of this license, visit \url{http://creativecommons.org/licenses/by-nc-sa/3.0/} 
+or send a letter
+to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.}
 \vspace{2em}
 
-\emph{本书所有实例代码依此方式放入公共领域。}
-
+\emph{All example code used in this book is hereby put in the public domain.}
 \end{figure}
 
-``学习~Go 语言'' 已经被翻译为：
+``Learning Go'' has been translated into:
 \begin{itemize}
-\item 中文，邢星；
+\item Chinese, by Xing Xing, 这里是中文译本: {\url{http://www.mikespook.com/learning-go/}}
 \end{itemize}
 
 \begin{center}
@@ -115,7 +114,7 @@ Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105
 \emph{Learning as we Go}
 (\emph{\version})
 
-\tiny{支持~Go 1.1 版本}
+\tiny{Supports the Go 1.1 release}
 \vspace{.2\stockheight}
 \end{center}
 
@@ -123,60 +122,50 @@ Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105
 
 \pagenumbering{roman}
 \tableofcontents*
-\listoffigures*
-%%\listoftables* %% there are so few
-\listofcode* 
 \listofex* 
 \clearpage
 
-\chapter*{前言}
+\chapter*{Preface}
 \label{chap:preface}
 \input{go-preface.tex}
 
-\chapter{简介}
 \pagenumbering{arabic}
+%% renamed from Basics
+\chapter{Introduction}
 \label{chap:intro}
-\input{go-intro.tex}
-
-\chapter{基础}
-\label{chap:basics}
 \input{go-basics.tex}
 
-\chapter{函数}
+\chapter{Functions}
 \label{chap:functions}
 \input{go-functions.tex}
 
-\chapter{包}
+\chapter{Packages}
 \label{chap:packages}
 \input{go-packages.tex}
 
-\chapter{进阶}
+\chapter{Beyond the basics}
 \label{chap:beyond}
 \input{go-beyond.tex}
 
-\chapter{接口}
+\chapter{Interfaces}
 \label{chap:interfaces}
 \input{go-interfaces.tex}
 
-\chapter{并发}
+\chapter{Concurrency}
 \label{chap:channels}
 \input{go-channels.tex}
 
-\chapter{通讯}
+\chapter{Communication}
 \label{chap:communication}
 \input{go-communication.tex}
 
-%%\chapter{Miscellaneous}
-%%\label{chap:miscellaneous}
-%%\input{go-misc.tex}
-
 \appendix
 
-\chapter{版权}
+\chapter{Colophon}
 \input{go-colophon}
 
 \begin{twocolumn}
-\chapter{索引}
+\chapter{Index}
 \printindex
 \end{twocolumn}
 \begin{onecolumn}
@@ -186,7 +175,7 @@ Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105
 \newpage
 \thispagestyle{empty}
 \begin{center}
-\emph{当前页留空。}
+\emph{This page is intentionally left blank.}
 \end{center}
 \end{onecolumn}
 \end{document}

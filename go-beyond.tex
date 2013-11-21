@@ -1,63 +1,79 @@
-\epi{``Go 有指针，但是没有指针运算。你不能用指针变量遍历字符串的各个字节。''}{\textit{Go For C++
+\epi{``Go has pointers but not pointer arithmetic. You cannot use a pointer
+variable to walk through the bytes of a string.''}{\textit{Go For C++
 Programmers}\\{\textsc{GO AUTHORS}}}
 \noindent{}
-Go 有指针。然而却没有指针运算，因此它们更象是引用而不是你所知道的来自于 C 的指针。
-指针非常有用。
-在 Go 中调用函数的时候，得记得变量是\emph{值传递}的。
-因此，为了修改一个传递\emph{入}函数的值的效率和可能性，有了指针。
+Go has pointers.
+There is however no pointer arithmetic, so they act more like
+references than pointers that you may know from C. Pointers 
+are useful.
+Remember that when you call a function in Go, the variables are
+\emph{pass-by-value}. So, for efficiency and the possibility to modify a
+passed value \emph{in} functions we have pointers.
 
-通过类型作为前缀来定义一个指针 '\key{*}'：
-\lstinline{var p *int}。现在 \var{p} 是一个指向整数值的指针。
-所有新定义的变量都被赋值为其类型的零值，而指针也一样。
-一个新定义的或者没有任何指向的指针，有值 \first{nil}{nil}。
-在其他语言中，这经常被叫做空（NULL）指针，在 Go 中就是 \var{nil}。
-让指针指向某些内容，可以使用\first{取址操作符}{operator!address-of}
-（\func{\&}），像这样：
-\begin{lstlisting}[caption=指针的使用,label=src:pointers]
+You declare a pointer by prefixing the type with an
+'\key{*}':
+\lstinline{var p *int}. Now \var{p} is a pointer to an integer value.
+All newly declared variables are assigned their zero value and pointers
+are no different. A newly declared pointer, or just a pointer that points to
+nothing, has a \first{nil}{nil}-value. In other languages this is often called
+a NULL pointer in Go it is just \var{nil}. To make 
+a pointer point to something you can use the \first{address-of operator}{operator!address-of}
+(\func{\&}), which we demonstrate here:
+\begin{lstlisting}[caption=Use of a pointer,label=src:pointers]
 var p *int
-fmt.Printf("%v", p) |\coderemark{打印 \var{nil}}|
+fmt.Printf("%v", p) |\coderemark{Prints \var{nil}}|
 
-var i int	    |\coderemark{定义一个整形变量 \var{i}}|
-p = &i		    |\coderemark{使得 \var{p} 指向 \var{i}}|
+var i int	    |\coderemark{Declare integer variable \var{i}}|
+p = &i		    |\coderemark{Make \var{p} point to \var{i}}|
 
-fmt.Printf("%v", p) |\coderemark{打印出来的内容类似 \var{0x7ff96b81c000a}}|
+fmt.Printf("%v", p) |\coderemark{Prints something like \var{0x7ff96b81c000a}}|
 \end{lstlisting}
-从指针获取值是通过在指针变量前置'\type{*}'实现的：
-\begin{lstlisting}[caption=获取指针指向的值,label=src:deref]
-p = &i			|\coderemark{获取 \var{i} 的地址}|
-*p = 8			|\coderemark{修改 \var{i} 的值}|
-fmt.Printf("%v\n", *p)  |\coderemark{打印 8}|
-fmt.Printf("%v\n", i)	|\coderemark{同上}|
+De-referencing a pointer is done by prefixing the pointer variable with
+'\type{*}':
+\begin{lstlisting}[caption=Dereferencing a pointer,label=src:deref]
+p = &i			|\coderemark{Take the address of \var{i}}|
+*p = 8			|\coderemark{Change the value of \var{i}}|
+fmt.Printf("%v\n", *p)  |\coderemark{Prints 8}|
+fmt.Printf("%v\n", i)	|\coderemark{Idem}|
 \end{lstlisting}
 
 \label{main:pointer arithmetic}
-前面已经说了，没有指针运算，所以如果这样写：
-\lstinline{*p++}，它表示 \lstinline{(*p)++}：首先获取指针指向的值，然后对这个值加一。
-\index{operator!increment}
-\footnote{参看练习 \ref{ex:pointer arithmetic}。}
+As said, there is no pointer arithmetic, so if you write:
+\lstinline{*p++}, it is interpreted as \lstinline{(*p)++}: first
+reference and then increment the value.\index{operator!increment}
+\footnote{See exercise \ref{ex:pointer arithmetic}.}
 
-\section{内存分配}
-Go 同样也垃圾收集，也就是说无须担心内存分配和回收。
+\section{Allocation}
+Go also has garbage collection, meaning that you don't have to worry about
+memory deallocation. 
 
-Go 有两个内存分配原语，\key{new} 和 \key{make}。它们应用于不同的类型，做不同的工作，
-可能有些迷惑人，但是规则很简单。
-下面的章节展示了在 Go 中如何处理内存分配，并且希望能够让
-\first{\key{new}}{built-in!new} 和 \first{\key{make}}{built-in!make} 之间的区别更加清晰。
+To allocate memory Go has two primitives, \key{new} and \key{make}. They do different
+things and apply to different types, which can be confusing, but the
+rules are simple.
+The following sections show how to handle allocation
+in Go and hopefully clarifies the somewhat artificial distinction between
+\first{\key{new}}{built-in!new} and \first{\key{make}}{built-in!make}. 
 
-\subsection{用 new 分配内存}
+\subsection{Allocation with new}
 \label{sec:allocation with new}
-内建函数 \key{new} 本质上说跟其他语言中的同名函数功能一样：
-\func{new(T)} 分配了零值填充的 \type{T} 类型的内存空间，并且返回其地址，
-一个 \type{*T} 类型的值。用 Go 的术语说，它返回了一个指针，指向新分配的类型 \type{T}
-的零值。记住这点非常重要。
+The built-in function \key{new} is 
+essentially the same as its namesakes in other languages: \func{new(T)}
+allocates zeroed storage for a new item of type \type{T} and returns its
+address, a value of type \type{*T}. In Go terminology, it returns a pointer to
+a newly allocated zero value of type \type{T}. This is important to
+remember.
 
-这意味着使用者可以用 \key{new} 创建一个数据结构的实例并且可以直接工作。
-如 \func{bytes.Buffer} 的文档所述``Buffer 的零值是一个准备好了的空缓冲。''
-类似的，\func{sync.Mutex} 也没有明确的构造函数或 Init 方法。取而代之，
-\func{sync.Mutex} 的零值被定义为非锁定的互斥量。
+This
+means a user of the data structure can create one with \key{new} and get
+right to work. For example, the documentation for \func{bytes.Buffer} states
+that ``the zero value for Buffer is an empty buffer ready to use.''
+Similarly, \func{sync.Mutex} does not have an explicit constructor or Init
+method. Instead, the zero value for a \func{sync.Mutex} is defined to be an
+unlocked mutex.
 
-零值是非常有用的。例如这样的类型定义，\pageref{sec:defining your own}
-页的 "\titleref{sec:defining your own}" 内容。
+The zero-value-is-useful property works transitively. Consider this type
+declaration. See section ``\titleref{sec:defining your own}'' on page
+\pageref{sec:defining your own}.
 
 \begin{lstlisting}
 type SyncedBuffer struct {
@@ -65,57 +81,66 @@ type SyncedBuffer struct {
     buffer  bytes.Buffer
 }
 \end{lstlisting}
-\type{SyncedBuffer} 的值在分配内存或定义之后立刻就可以使用。在这个片段中，
-\var{p} 和 \var{v} 都可以在没有任何更进一步处理的情况下工作。
+Values of type \type{SyncedBuffer} are also ready to use immediately upon
+allocation or just declaration. In this snippet, both \var{p} and
+\var{v} will work
+correctly without further arrangement.
 \begin{lstlisting}
-p := new(SyncedBuffer)  |\coderemark{Type *SyncedBuffer，已经可以使用}|
-var v SyncedBuffer      |\coderemark{Type  SyncedBuffer，同上}|
+p := new(SyncedBuffer)  |\coderemark{Type *SyncedBuffer, ready to use}|
+var v SyncedBuffer      |\coderemark{Type  SyncedBuffer, idem}|
 \end{lstlisting}
 
-\subsection{用 make 分配内存}
+\subsection{Allocation with make}
 \label{sec:allocation with make}
-回到内存分配。内建函数 \func{make(T, args)} 与 \func{new(T)} 有着不同的功能。
-它\emph{只能}创建 slice，map 和 channel，并且返回一个有初始值（非零）的 \type{T} 类型，
-而不是 \type{*T}。本质来讲，
-导致这三个类型有所不同的原因是指向数据结构的引用在使用前必须被初始化。
-例如，一个 slice，是一个包含指向数据（内部 array）的指针，长度和容量的三项描述符；
-在这些项目被初始化之前，slice 为 \type{nil}。对于 slice，map 和 channel，
-\key{make} 初始化了内部的数据结构，填充适当的值。
+Back to allocation. The built-in function \func{make(T, args)} serves a purpose
+different from \func{new(T)}. It creates slices, maps, and channels \emph{only}, and
+it returns an initialized (not zero) value of type \type{T}, not
+\type{*T}. The reason
+for the distinction is that these three types are, under the covers,
+references to data structures that must be initialized before use. A
+slice, for example, is a three-item descriptor containing a pointer to
+the data (inside an array), the length, and the capacity; until those
+items are initialized, the slice is \type{nil}. For slices, maps, and channels,
+\key{make} initializes the internal data structure and prepares the value for
+use.
 
-例如，
+For instance,
 \lstinline{make([]int, 10, 100)}
-分配了 100 个整数的数组，然后用长度 10 和容量 100 创建了 slice 
-结构指向数组的前 10 个元素。
-区别是，\lstinline{new([]int)} 返回指向新分配的内存的指针，
-而零值填充的 slice 结构是指向 \type{nil} 的 slice 值。
-
-这个例子展示了 \key{new} 和 \key{make} 的不同。
+allocates an array of 100 ints and then creates a slice structure with
+length 10 and a capacity of 100 pointing at the first 10 elements of the
+array. In contrast,
+\lstinline{new([]int)} returns
+a pointer to a newly allocated, zeroed slice structure, that is, a
+pointer to a \type{nil} slice value.
+These examples illustrate the difference between \key{new} and
+\key{make}.
 \begin{lstlisting}
-    var p *[]int = new([]int)       |\coderemark{分配 slice 结构内存；*p == nil}|
-				    |\coderemark{已经可用}|
-    var v  []int = make([]int, 100) |\coderemark{v 指向一个新分配的有 100 个整数的数组。}|
+var p *[]int = new([]int)       |\coderemark{Allocates slice structure;rarely useful}|
+var v  []int = make([]int, 100) |\coderemark{\var{v} refers to a new array of 100 ints}|
 
-    var p *[]int = new([]int)       |\coderemark{不必要的复杂例子}|
+var p *[]int = new([]int)       |\coderemark{Unnecessarily complex}|
 *p = make([]int, 100, 100)
 
-    v := make([]int, 100)           |\coderemark{更常见}|
+v := make([]int, 100)           |\coderemark{Idiomatic}|
 \end{lstlisting}
-务必记得 \key{make} 仅适用于 map，slice 和 channel，并且返回的不是指针。
-应当用 \key{new} 获得特定的指针。
+Remember that \key{make} applies only to maps, slices and channels and does
+not return a pointer. To obtain an explicit pointer allocate with
+\key{new}.
 
-\begin{lbar}[new 分配；make 初始化]
-上面的两段可以简单总结为：
+\begin{lbar}[new allocates; make initializes]
+The above two paragraphs can be summarized as:
 \begin{itemize}
-\item \lstinline{new(T)} 返回 \var{*T} 指向一个零值 \var{T}
-\item \lstinline{make(T)} 返回初始化后的 \var{T}
+\item \lstinline{new(T)} returns \var{*T} pointing to a zeroed \var{T}
+\item \lstinline{make(T)} returns an initialized \var{T}
 \end{itemize}
-当然 \lstinline{make} 仅适用于 slice，map 和 channel。
+And of course \lstinline{make} is only used for slices, maps and channels.
 \end{lbar}
 
-\subsection{构造函数与复合声明}
+\subsection{Constructors and composite literals}
 \label{sec:constructors and composite literals}
-有时零值不能满足需求，必须要有一个用于初始化的构造函数，例如这个来自
-\package{os} 包的例子。
+Sometimes the zero value isn't good enough and an initializing
+constructor is necessary, as in this example taken from the package
+\package{os}.
 \begin{lstlisting}
 func NewFile(fd int, name string) *File {
     if fd < 0 {
@@ -129,7 +154,9 @@ func NewFile(fd int, name string) *File {
     return f
 }
 \end{lstlisting}
-有许多冗长的内容。可以使用\first{复合声明}{literal!composite}使其更加简洁，每次只用一个表达式创建一个新的实例。
+There's a lot of boiler plate in there. We can simplify it using a
+\first{composite literal}{literal!composite}, which is an expression that 
+creates a new instance each time it is evaluated.
 
 \begin{lstlisting}
 func NewFile(fd int, name string) *File {
@@ -137,66 +164,79 @@ func NewFile(fd int, name string) *File {
         return nil
     }
     f := File{fd, name, nil, 0}	|\coderemark{Create a new \type{File}}|
-    return &f|\coderemark{返回~\var{f} 的地址}|
+    return &f	|\coderemark{Return the address of \var{f}}|
 }
 \end{lstlisting}
-返回本地变量的地址没有问题；在函数返回后，相关的存储区域仍然存在。
+It is OK to return the address of a local variable;
+the storage associated with the variable survives after the function
+returns.
 
-事实上，从复合声明获取分配的实例的地址更好，因此可以最终将两行缩短到一行。
-\footnote{从复合声明中获取地址，意味着告诉编译器在堆中分配空间，而不是栈中。}
+In fact, taking the address of a composite literal allocates a
+fresh instance each time it is evaluated, so we can combine these last
+two lines.\footnote{Taking the address of a composite literal tells the 
+compiler to allocate it on the heap, not the stack.}
 \begin{lstlisting}
 return &File{fd, name, nil, 0}
 \end{lstlisting}
-The items (called  of a composite 
-+literal are laid out in order and must all be
-所有的项目（称作 \first{字段}{fields}）都必须按顺序全部写上。
-然而，通过对元素用字段:值成对的标识，
-初始化内容可以按任意顺序出现，并且可以省略初始化为零值的字段。因此可以这样
+The items (called \first{fields}{fields}) of a composite 
+literal are laid out in order and must all be
+present. However, by labeling the elements explicitly as field:value
+pairs, the initializers can appear in any order, with the missing ones
+left as their respective zero values. Thus we could say
 
 \begin{lstlisting}
 return &File{fd: fd, name: name}
 \end{lstlisting}
-在特定的情况下，如果复合声明不包含任何字段，它创建特定类型的零值。
-表达式 \lstinline{new(File)} 和 \lstinline|&File{}| 是等价的。
+As a limiting case, if a composite literal contains no fields at all, it
+creates a zero value for the type. The expressions
+\lstinline{new(File)} and 
+\lstinline|&File{}| are equivalent.
 
-复合声明同样可以用于创建 array，slice 和 map，通过指定适当的索引和 map 键来标识字段。
-在这个例子中，无论是 \var{Enone}，\var{Eio} 还是 \var{Einval} 初始化都能很好的工作，只要确保它们不同就好了。
+Composite literals can also be created for arrays, slices, and maps,
+with the field labels being indices or map keys as appropriate. In these
+examples, the initializations work regardless of the values of
+\var{Enone}, and \var{Einval}, as long as they are distinct.
 \begin{lstlisting}
 ar := [...]string{Enone: "no error", Einval: "invalid argument"}
 sl := []string{Enone: "no error", Einval: "invalid argument"}
 ma := map[int]string {Enone: "no error", Einval: "invalid argument"}
 \end{lstlisting}
 
-\section{定义自己的类型}
+\section{Defining your own types}
 \label{sec:defining your own}
-自然，Go 允许定义新的类型，通过关键字
-\first{\key{type}}{keyword!type} 实现： 
+Of course Go allows you to define new types, it does this 
+with the \first{\key{type}}{keyword!type} keyword: 
 \begin{lstlisting}
 type foo int
 \end{lstlisting}
-创建了一个新的类型 \lstinline{foo} 作用跟 \lstinline{int} 一样。
-创建更加复杂的类型需要用到 \first{\key{struct}}{keyword!struct} 关键字。
-这有个在一个数据结构中记录某人的姓名（\type{string}）和年龄（\type{int}），
-并且使其成为一个新的类型的例子：
-\lstinputlisting[label=src:struct,caption=结构体]{src/struct.go}
+Creates
+a new type \lstinline{foo} which acts like an \lstinline{int}.
+Creating more sophisticated types is done with the
+\first{\key{struct}}{keyword!struct}
+keyword.
+An example would be when we want record somebody's name (\type{string})
+and age (\type{int}) in a single structure and make it a new type:
+\lstinputlisting[label=src:struct,caption=Structures]{src/struct.go}
 \needspace{5\baselineskip}
-通常，\lstinline{fmt.Printf("%v\n", a)} 的输出是
+Apropos, the output of \lstinline{fmt.Printf("%v\n", a)} is 
 \begin{display}
 &\{Pete 42\}
 \end{display}
 
-这很棒！Go 知道如何打印结构。如果仅想打印某一个，或者某几个结构中的字段，
-需要使用 \verb|.<field name>|。例如，仅仅打印名字：
+That is nice!
+Go knows how to print your structure. If you
+only want to print one, or a few, fields of the structure you'll
+need to use \verb|.<field name>|. For example to only print the name:
 \begin{lstlisting}
-fmt.Printf("%s", a.name) |\coderemark{\%s 格式化字符串}|
+fmt.Printf("%s", a.name) |\coderemark{\%s formats a string}|
 \end{lstlisting}
 %% add text if a is a pointer
 
-\subsection{结构字段}
-之前已经提到结构中的项目被称为\index{字段}{field}。
-没有字段的结构：\lstinline|struct {}|
+\subsection{More on structure fields}
+As said each item in a structure is called a \index{field}{field}.
+A struct with no fields: \lstinline|struct {}|
 
-或者有四个\footnote{是的，四（4）个。}字段的：
+Or one with four\footnote{Yes, four (4).} fields:
 \begin{lstlisting}
 struct {
         x, y int
@@ -204,92 +244,103 @@ struct {
         F func()
 }
 \end{lstlisting}
-如果省略字段的名字，可以创建\first{匿名字段}{field!anonymous}，例如：
+If you omit the name for a field, you create an 
+\first{anonymous field}{field!anonymous}, for instance:
 \begin{lstlisting}
 struct {
-        T1        |\coderemark{字段名字是 \var{T1}}|
-        *T2       |\coderemark{字段名字是 \var{T2}}|
-        P.T3      |\coderemark{字段名字是 \var{T3}}|
-        x, y int  |\coderemark{字段名字是 \var{x} 和 \var{y}}|
+        T1        |\coderemark{Field name is \var{T1}}|
+        *T2       |\coderemark{Field name is \var{T2}}|
+        P.T3      |\coderemark{Field name is \var{T3}}|
+        x, y int  |\coderemark{Field names are \var{x} and \var{y}}|
 }
 \end{lstlisting}
-注意首字母大写的字段可以被导出，也就是说，在其他包中可以进行读写。
-字段名以小写字母开头是当前包的私有的。包的函数定义是类似的，参阅第 \ref{chap:packages} 章了解更多细节。
+Note that field names that start with a capital letter are exported, i.e. can be
+set or read from other packages. Field names that start with a lowercase are private
+to the current package. The same goes for functions defined in packages, see chapter
+\ref{chap:packages} for the details.
 
-\subsection{方法}
+\subsection{Methods}
 \label{sec:methods}
-可以对新定义的类型创建函数以便操作，可以通过两种途径：
+If you create functions that work on your newly defined type, you can
+take two routes:
 \begin{enumerate}
-\item 创建一个函数接受这个类型的参数。
+\item Create a function that takes the type as an argument.
 \begin{lstlisting}
 func doSomething(n1 *NameAge, n2 int) { /* */ }
 \end{lstlisting}
-（你可能已经猜到了）这是 \first{\emph{函数调用}}{function!call}。
-\item 创建一个工作在这个类型上的函数（参阅在 \ref{src:function definition}
-中定义的\emph{接收方}）：
+This is (you might have guessed) a \first{\emph{function call}}{function!call}.
+\item Create a function that works on the type (see \emph{receiver} in
+listing \ref{src:function definition}):
 \begin{lstlisting}
 func (n1 *NameAge) doSomething(n2 int) { /* */ }
 \end{lstlisting}
-这是\first{\emph{方法调用}}{method call}，可以类似这样使用：
+This is a \first{\emph{method call}}{method call}, which can be
+used as: 
 \begin{lstlisting}
 var n *NameAge
 n.doSomething(2)
 \end{lstlisting}
 \end{enumerate}
-使用函数还是方法是由程序员决定的，但是如果想要满足接口（参阅下一章）就只能使用方法。
-如果没有这方面的需求，那就由个人品味决定了。
+Whether to use a function or method is entirely up to the programmer, but
+if you want to satisfy an interface (see the next chapter) you must use
+methods. If no such requirement exists it is a matter of taste whether
+to use functions or methods.
 
-使用函数还是方法完全是由程序员说了算，但是若需要满足接口（参看下一章）就必须使用方法。
-如果没有这样的需求，那就完全由习惯来决定是使用函数还是方法了。
-
-但是下面的内容一定要留意，引用自 \cite{go_spec}：
+But keep the following in mind, this is quoted from \cite{go_spec}:
 \begin{quote}
-如果 \type{x} 可获取地址，并且 \lstinline{&x} 的方法中包含了 \func{m}，
-\lstinline{x.m()} 是 \mbox{\lstinline{(&x).m()}} 更短的写法。
+If \type{x} is
+addressable and \lstinline{&x}'s method set contains \func{m}, 
+\lstinline{x.m()} is shorthand for \mbox{\lstinline{(&x).m()}}.
 \end{quote}
-根据上面所述，这意味着下面的情况\emph{不是}错误：
+In the above case this means that the following is \emph{not} an 
+error:
 \begin{lstlisting}
-var n NameAge	    |\coderemark{不是指针}|
+var n NameAge	    |\coderemark{Not a pointer}|
 n.doSomething(2)    
 \end{lstlisting}
-这里 Go 会查找 \type{NameAge} 类型的变量 \var{n} 的方法列表，
-没有找到就会\emph{再}查找 \type{*NameAge} 类型的方法列表，并且将其转化为
-\lstinline{(&n).doSomething(2)}。
+Here Go will search the method list for \var{n} of type \type{NameAge},
+come up empty and will then \emph{also} search the method list for
+the type \type{*NameAge} and will translate this call to
+\lstinline{(&n).doSomething(2)}.
 
-下面的类型定义中有一些微小但是很重要的不同之处。同时可以参阅 \cite[section~``Type Declarations'']{go_spec}。
-假设有：
+There is a subtle but major difference between the following type
+declarations. Also see \cite[section~``Type Declarations'']{go_spec}.
+Suppose we have:
 \begin{lstlisting}
-// Mutex 数据类型有两个方法，Lock 和 Unlock。
-type Mutex struct         { /* Mutex 字段 */ }
-func (m *Mutex) Lock()    { /* Lock 实现 */ }
-func (m *Mutex) Unlock()  { /* Unlock 实现 */ }
+// A Mutex is a data type with two methods,
+// Lock and Unlock.
+type Mutex struct         { /* Mutex fields */ }
+func (m *Mutex) Lock()    { /* Lock impl. */ }
+func (m *Mutex) Unlock()  { /* Unlock impl. */ }
 \end{lstlisting}
-现在用两种不同的风格创建了两个数据类型。
+We now create two types in two different manners:
 \begin{itemize}
 \item \lstinline|type NewMutex Mutex|;
 \item \lstinline|type PrintableMutex struct {  Mutex }|.
 \end{itemize}
-现在 \var{NewMutux} 等同于 \var{Mutex}，但是它没有任何 \var{Mutex} 的方法。
-换句话说，它的方法是空的。
-
-但是 \var{PrintableMutex} \emph{已经}从 \var{Mutex} \first{\emph{继承}}{methods!inherited}了方法集合。
-如同 \cite{go_spec} 所说：
+Now \var{NewMutex} is equal to \var{Mutex}, but
+it \emph{does not} have \emph{any} of the methods of \var{Mutex}. In other words
+its method set is empty.
+But \var{PrintableMutex} \emph{has} \first{\emph{inherited}}{methods!inherited} the 
+method set from \var{Mutex}.
+In the words of \cite{go_spec}:
 \begin{quote}
-\var{*PrintableMutex} 的方法集合包含了
-\func{Lock} 和 \func{Unlock} 方法，被绑定到其匿名字段 \var{Mutex}。
+The method set of \var{*PrintableMutex} contains the methods
+\func{Lock} and \func{Unlock} bound to its anonymous field \var{Mutex}.
 \end{quote}
 
-\section{转换}
+\section{Conversions}
 \label{sec:conversions}
-有时需要将一个类型转换为另一个类型。
-在 Go 中可以做到，不过有一些规则。首先，将一个值转换为另一个是由操作符（看起来像函数：\func{byte()}）完成的，
-并且不是所有的转换都是允许的。
+Sometimes you want to convert a type to another type. 
+This is possible in Go, but
+there are some rules. For starters, converting from one value to another
+is done by operators (that look like functions: \func{byte()}) and not all conversions are allowed.
 
 \begin{table}[H]
 \begin{center}
-\caption[Valid conversions]{合法的转换， 
-\lstinline{float64} 同 \lstinline{float32} 类似。注意，
-为了适配表格的显示，float32 被简写为~flt32。}
+\caption[Valid conversions]{Valid conversions,
+\lstinline{float64} works the same as \lstinline{float32}. Note that
+float32 has been abbreviated to flt32 in this table to make it fit on the page.}
 \label{tab:convesion}
 \input{tab/conversion.tex}
 \end{center}
@@ -297,7 +348,7 @@ func (m *Mutex) Unlock()  { /* Unlock 实现 */ }
 
 \begin{itemize}
 \item{
-从 \lstinline{string} 到字节或者 ruin 的 slice。
+From a \lstinline{string} to a slice of bytes or runes.
 \begin{lstlisting}
 mystring := "hello this is string"
 \end{lstlisting}
@@ -305,59 +356,72 @@ mystring := "hello this is string"
 \begin{lstlisting}
 byteslice := []byte(mystring)
 \end{lstlisting}
-转换到 \type{byte} slice，每个 \type{byte} 保存字符串对应字节的整数值。
-注意 Go 的字符串是 UTF-8 编码的，一些字符可能是1、2、3 或者 4 个字节结尾。
+Converts to a \type{byte} slice, each \type{byte} contains the integer value
+of the corresponding byte in the string. Note that as strings in Go
+are encoded in UTF-8 some characters in the string may end up in 1, 2, 3
+or 4 bytes.
 \begin{lstlisting}
 runeslice  := []rune(mystring)
 \end{lstlisting}
-转换到 \type{rune} slice，每个 \type{rune} 保存 Unicode 编码的指针。
-字符串中的每个字符对应一个整数。
+Converts to an \type{rune} slice, each \type{rune} contains a Unicode code
+point. Every character from the string corresponds to one rune.
 }
 \item{
-从字节或者整形的 slice 到 \lstinline{string}。
+From a slice of bytes or runes to a \lstinline{string}.
 \begin{lstlisting}
-b := []byte{'h','e','l','l','o'} // 复合声明
+b := []byte{'h','e','l','l','o'} // Composite 
+                                 // literal
 s := string(b)
 i := []rune{257,1024,65} 
 r := string(i)
 \end{lstlisting}
 }
 \end{itemize}
-对于数值，定义了下面的转换：
+For numeric values the following conversions are defined:
 \begin{itemize}
-\item{将整数转换到指定的（bit）长度： 
-\lstinline{uint8(int)}；}
-\item{从浮点数到整数：
-\lstinline{int(float32)}。这会截断浮点数的小数部分；}
-\item{其他的类似：\lstinline{float32(int)}。}
+\item{Convert to an integer with a specific (bit) length:
+\lstinline{uint8(int)};}
+\item{From floating point to an integer value: 
+\lstinline{int(float32)}. This discards the fraction part
+from the floating point value;}
+\item{The other way around: \lstinline{float32(int)};}
 \end{itemize}
 
-\subsection{用户定义类型的转换}
-如何在自定义类型之间进行转换？
-这里创建了两个类型 \type{Foo} 和 \type{Bar}，而
-\lstinline{Bar} 是 \type{Foo} 的一个别名：
+\subsection{User defined types and conversions}
+How can you convert between the types you have defined
+yourself?
+We create two types here \type{Foo} and \type{Bar}, where
+\lstinline{Bar} is an alias for \type{Foo}:
 \begin{lstlisting}
-type foo struct { int }  |\coderemark{匿名字段}|
-type bar foo             |\coderemark{bar 是 foo 的别名}|
+type foo struct { int }  |\coderemark{Anonymous struct field}|
+type bar foo             |\coderemark{bar is an alias for foo}|
 \end{lstlisting}
 
-然后：
+Then we:
 \begin{lstlisting}
-var b bar = bar{1} |\coderemark{声明 \var{b} 为 \type{bar} 类型}|
-var f foo = b	   |\coderemark{赋值 \var{b} 到 \var{f}}|
+var b bar = bar{1} |\coderemark{Declare \var{b} to be a \type{bar}}|
+var f foo = b	   |\coderemark{Assign \var{b} to \var{f}}|
 \end{lstlisting}
-最后一行会引起错误：
+Which fails on the last line with:
 
-\noindent\error{cannot use b (type bar) as type foo in assignment(不能使用 b（类型 bar）作为类型 foo 赋值)}
+\noindent\error{cannot use b (type bar) as type foo in assignment}
 
-\noindent{}这可以通过转换来修复：
+\noindent{}This can be fixed with a conversion:
 \begin{lstlisting}
 var f foo = foo(b)
 \end{lstlisting}
-注意转换那些字段不一致的结构是相当困难的。同时注意，转换
-\lstinline{b} 到 \type{int} 同样会出错；整数与有整数字段的结构并不一样。
+Note that converting structures that are not identical in their fields
+is more difficult. Also note that converting \lstinline{b} to a plain
+\type{int} also fails; an integer is not the same as a structure containing
+an integer.
 
-\section{练习}
+\section{Composition}
+TODO(miek):work in progress
+Go isn't an object oriented language and as such does not have inheritance, but sometimes you
+do want to "inherit" some methods that are implemented for a type and change a few. In Go is
+this possible by embedding a type.
+
+\section{Exercises}
 \input{ex-beyond/ex-pointer-arith.tex}
 
 \input{ex-beyond/ex-map.tex}
@@ -371,5 +435,5 @@ var f foo = foo(b)
 \input{ex-beyond/ex-pointers-method.tex}
 
 \cleardoublepage
-\section{答案}
+\section{Answers}
 \shipoutAnswer
